@@ -16,7 +16,7 @@ It will generate ASCII equivalent version.
 Simple output:
 
 ```
-C:\Users\User\Desktop>python muts_encoder.py egg.txt
+C:\Users\User\Desktop>python betta_encoder.py egg.txt
 ##########################################################################################
 $ SUB/PUSH/POP based ASCII shellcode encoder.
 $ This technique was originally used by Mati Aharoni (@muts) for bypassing limited character set.
