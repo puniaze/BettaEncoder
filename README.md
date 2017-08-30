@@ -8,9 +8,11 @@ SUB/PUSH/POP based ASCII shellcode encoder
 Generate shellcode with \x format and save it to file. Then run this command
 
 ```
-python betta_encoder.py shellcode.txt
+python betta_encoder.py -f shellcode.txt --stub true
 
 ```
+
+You should provide ESP and address where decoded shellcode must be placed via --stub argument. You can encode without that but you should manually add stub or adjust ESP.
 
 It will generate ASCII equivalent version.
 
