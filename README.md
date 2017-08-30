@@ -12,6 +12,25 @@ It will generate ASCII equivalent version.
 
 ```
 
+This kind of assembly opcodes are generated:
+
+```
+
+AND EAX,554E4D4A  ;  \  Zeroing EAX
+AND EAX,2A313235  ;  /  
+
+SUB EAX,5D555D2E  ;  \
+SUB EAX,5D555D2E  ;   | Producing original 4 bytes 
+SUB EAX,5D555E2F  ;  /
+
+PUSH EAX	  ; Pushing original bytes to stack 
+
+INC ECX		  ; \  NOP-style instructions
+INC ECX		  ; /
+
+... and so on
+
+```
 
 Simple output:
 
