@@ -35,6 +35,9 @@ INC ECX		  ; /
 
 ## Simple output:
 
+This is example of encoding NTAccessCheckAndAuditAlarm Egghunter using Betta Encoder.
+
+
 ```
 C:\Users\User\Desktop>python betta_encoder.py egg.txt
 ##########################################################################################
