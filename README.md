@@ -33,7 +33,7 @@ INC ECX		  ; /
 
 ```
 
-Simple output:
+## Simple output:
 
 ```
 C:\Users\User\Desktop>python betta_encoder.py egg.txt
