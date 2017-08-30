@@ -2,7 +2,7 @@
 SUB/PUSH/POP based ASCII shellcode encoder
 
 
-## ***Usage***
+## **Usage:**
 
 ```
 Generate shellcode with \x format and save it to file. Then run this command
